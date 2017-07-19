@@ -11,12 +11,12 @@ version=0.0.1
 
 # Optional items:
 
-changelog: 0.0.1   second version for QGIS 2.0.0
+changelog: 0.0.1   first version for QGIS 2.x
 
 tags= Tools, Polygons Orderer by size- Python  QGIS
 homepage=none
-tracker=none
-repository=non
+tracker=https://github.com/tomflyjc/Polygons_Pile/issues
+repository=https://github.com/tomflyjc/Polygons_Pile
 icon=data/PolyPile.png 
 experimental=True
 deprecated=False
