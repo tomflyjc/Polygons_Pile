@@ -5,7 +5,7 @@ name=Polygons_Pile
 qgisMinimumVersion=2.0.0
 category=Vector
 description= a tools for better polygons layer viewing in QGIS
-about= this plugin pile up the polygons of a layer and copy them in a new layer in a pyramid-like way, that is to say with the smallests on top of the largest's ones, in order to let the users see as many objects as possible when opening the layer without using the style properties.
+about= this plugin piles up the polygons of a layer and copy them in a new layer in a pyramid-like way, that is to say with the smallests on top of the largest's ones, in order to let the users see as many objects as possible when opening the layer without using the style properties.
 version=0.0.1
 
 
