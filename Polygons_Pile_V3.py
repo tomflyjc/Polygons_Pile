@@ -1,20 +1,25 @@
 # -*- coding: utf-8 -*-
 
-from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-from qgis.core import *
-from qgis.gui import *
+import os
+import os.path
+from qgis.core import QgsProject, QgsMapLayer, QgsWkbTypes
+from qgis.PyQt.QtCore import QFileInfo, QSettings, QCoreApplication
+from qgis.PyQt.QtCore import QTranslator, qVersion
+from qgis.PyQt.QtGui import QIcon
+#from qgis.PyQt.QtWidgets import QAction, QMessageBox,QToolButton
+from qgis.PyQt.QtWidgets import *
+from qgis.PyQt.QtGui import *
+from qgis.PyQt.QtCore import *
+import sys
+sys.path.append(os.path.dirname(__file__))
 
 import os
-import doAbout
-import doListLayers2
 from qgis.gui  import QgsMapCanvas
 
 # chargement des fichiers d'interface graphique
-import doListLayers2
-import doAbout
-import fonctionsF
+import doListLayersPolygonPile
+import doAboutPolygonPile
+import fonctionsPolygonPile
 
 #Fonction de reconstruction du chemin absolu vers la ressource image
 def getThemeIcon(theName):
@@ -22,9 +27,10 @@ def getThemeIcon(theName):
     myDefPathIcons = myPath + "/icons/"
     myDefPath = myPath.replace("\\","/")+ theName;
     myDefPathIcons = myDefPathIcons.replace("\\","/")+ theName;
-    myCurThemePath = QgsApplication.activeThemePath() + "/plugins/" + theName;
-    myDefThemePath = QgsApplication.defaultThemePath() + "/plugins/" + theName;
-    #Attention, ci-dessous, le chemin est à persoonaliser :
+    pluginPath = QFileInfo(os.path.realpath(__file__)).path()
+    
+    myCurThemePath =  pluginPath + "/plugins/" + theName;
+    myDefThemePath =  pluginPath + "/plugins/" + theName;#Attention, ci-dessous, le chemin est à persoonaliser :
     #remplacer "extension" par le nom du répertoire de l'extension.
     myQrcPath = "python/plugins/extension/" + theName;
     if QFile.exists(myDefPath): return myDefPath
@@ -77,8 +83,8 @@ class MainPlugin(object):
     self.iface.addPluginToVectorMenu("Polygons_Pile", self.about)
 
     #Connection de la commande à l'action
-    QObject.connect(self.commande1,SIGNAL("triggered()"),self.LoadDlgBox2)
-    QObject.connect(self.about,SIGNAL("triggered()"),self.doInfo)
+    self.commande1.triggered.connect(self.LoadDlgBox2)
+    self.about.triggered.connect(self.doInfo)
 
   #Méthode au déchargement de l'extension
   def unload(self):
@@ -91,11 +97,10 @@ class MainPlugin(object):
     """
   #Exemple d'appel d'une boîte de dialogue:
   def LoadDlgBox2(self):
-      d = doListLayers2.Dialog()
-      #d.show()
+      d = doListLayersPolygonPile.Dialog()
       d.exec_()
 
   def doInfo(self):
-      d = doAbout.Dialog()
+      d = doAboutPolygonPile.Dialog()
       d.exec_()
 
