@@ -1,32 +1,56 @@
 # -*- coding: utf-8 -*-
-#necessaire pour les connections signals / slots
-from PyQt4 import QtCore, QtGui
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-
-from osgeo import ogr
-# pour ordonner des dictionnaires
-from collections import OrderedDict
-
+# (c) JC BAUDIN 2019 02 05
 # import de QGIS
-from qgis import *
-from qgis.core import *
-from qgis.gui import *
-from qgis.gui import QgsMapCanvas
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5.QtCore import QVariant
+from qgis.PyQt.QtWidgets import     (QMessageBox,
+                                    QDialog,
+                                    QProgressBar,
+                                    QDialogButtonBox,
+                                    QAction,
+                                    QLabel,
+                                    QComboBox,
+                                    QPushButton,
+                                    QLineEdit,
+                                    QApplication)
+
+ 
+
+from qgis.core import  (QgsProject,
+                        QgsMapLayer,
+                        QgsWkbTypes,
+                       QgsVectorLayer,
+                       QgsField,
+                       QgsFields,
+                       QgsFeature,
+                       QgsFeatureSink,
+                       QgsFeatureRequest,
+                       QgsGeometry,
+                       QgsPointXY,
+                       QgsWkbTypes,
+                       QgsRectangle,
+                       QgsFeature,
+                       QgsSpatialIndex,
+                       QgsCoordinateTransform,
+                       QgsFeatureRequest,
+                       QgsVector,
+                       QgsProject,
+                       QgsCoordinateReferenceSystem,
+                       QgsCoordinateTransform)
+                       
 from qgis.utils import iface
+
+import os
+import os.path
+import fonctionsPolygonPile
+import doAboutPolygonPile
 
 import processing
 from processing import *
 
-import os
-import os.path
-
-import fonctionsF
-import doAbout
-
 class Ui_Dialog(object):
-    def __init__(self, iface):
-        self.iface = iface
+    
     
     def setupUi(self, Dialog):
         self.iface = iface
@@ -35,7 +59,7 @@ class Ui_Dialog(object):
         Dialog.setWindowTitle("Polygons_Pile")
         
         # QLabel lancer recherche
-        self.label10 = QtGui.QLabel(Dialog)
+        self.label10 = QLabel(Dialog)
         self.label10.setGeometry(QtCore.QRect(15,20,300,18))
         self.label10.setObjectName("label10")
         self.label10.setText("Select a layer of polygons:  ")
@@ -53,7 +77,7 @@ class Ui_Dialog(object):
                     else:
                        QMessageBox.information(None,"information: ","No layers with polygons ! ")
                        return None
-        self.ComboBoxPolygones = QtGui.QComboBox(Dialog)
+        self.ComboBoxPolygones = QComboBox(Dialog)
         self.ComboBoxPolygones.setMinimumSize(QtCore.QSize(300, 25))
         self.ComboBoxPolygones.setMaximumSize(QtCore.QSize(300, 25))
         self.ComboBoxPolygones.setGeometry(QtCore.QRect(10, 45, 300,25))
@@ -61,7 +85,7 @@ class Ui_Dialog(object):
         for i in range(len(ListeCouchesPoly)):  self.ComboBoxPolygones.addItem(ListeCouchesPoly[i])
 
         #Exemple de QPushButton
-        self.DoButton = QtGui.QPushButton(Dialog)
+        self.DoButton = QPushButton(Dialog)
         self.DoButton.setMinimumSize(QtCore.QSize(200, 20))
         self.DoButton.setMaximumSize(QtCore.QSize(200, 20))        
         self.DoButton.setGeometry(QtCore.QRect(60,80, 200, 20))
@@ -69,14 +93,14 @@ class Ui_Dialog(object):
         self.DoButton.setText(" Let's do it ... being patient !")
 
         #Exemple de QPushButton
-        self.aboutButton = QtGui.QPushButton(Dialog)
+        self.aboutButton = QPushButton(Dialog)
         self.aboutButton.setMinimumSize(QtCore.QSize(70, 20))
         self.aboutButton.setMaximumSize(QtCore.QSize(70, 20))        
         self.aboutButton.setGeometry(QtCore.QRect(30, 110, 70, 23))
         self.aboutButton.setObjectName("aboutButton")
         self.aboutButton.setText(" Read me ")
         
-        self.PushButton = QtGui.QPushButton(Dialog)
+        self.PushButton = QPushButton(Dialog)
         self.PushButton.setMinimumSize(QtCore.QSize(100, 20))
         self.PushButton.setMaximumSize(QtCore.QSize(100, 20))
         self.PushButton.setGeometry(QtCore.QRect(185, 110, 100,23))
@@ -84,7 +108,7 @@ class Ui_Dialog(object):
         self.PushButton.setText("Quit")
          
         #ProgressBar
-        self.progressBar = QtGui.QProgressBar(Dialog)
+        self.progressBar = QProgressBar(Dialog)
         self.progressBar.setProperty("value", 0)
         self.progressBar.setMinimumSize(QtCore.QSize(260, 15))
         self.progressBar.setMaximumSize(QtCore.QSize(260, 15))
@@ -100,17 +124,17 @@ class Ui_Dialog(object):
         self.progressBar.setValue(0)
          
         # actions
-        QtCore.QObject.connect(self.PushButton,QtCore.SIGNAL("clicked()"),Dialog.reject)
-        QtCore.QObject.connect(self.ComboBoxPolygones,QtCore.SIGNAL("currentIndexChanged(QString)"),self.onComboP)
-        QtCore.QObject.connect(self.aboutButton, SIGNAL("clicked()"), self.doAbout)
-        QtCore.QObject.connect(self.DoButton, SIGNAL("clicked()"), self.Run)
+        self.PushButton.clicked.connect(Dialog.reject)
+        self.ComboBoxPolygones.activated[str].connect(self.onComboP)
+        self.aboutButton.clicked.connect(self.doAbout)
+        self.DoButton.clicked.connect(self.Run)
         QtCore.QMetaObject.connectSlotsByName(Dialog)
                                                              
     def onComboP(self):
         global zdim
         SelectionP = self.ComboBoxPolygones.currentText()
         #QMessageBox.information(None,"information:","couche selectionnee: "+ (SelectionP))
-        CoucheP=fonctionsF.getVectorLayerByName(SelectionP)
+        CoucheP=fonctionsPolygonPile.getVectorLayerByName(SelectionP)
         counterP=zdim=0
         for featP in CoucheP.getFeatures(QgsFeatureRequest()):
             counterP+=1
@@ -119,12 +143,12 @@ class Ui_Dialog(object):
             QMessageBox.information(None,"information:","Layer "+ str(CoucheP.name())+"  do not contain polygons!")
                
     def doAbout(self):
-        d = doAbout.Dialog()
+        d = doAboutPolygonPile.Dialog()
         d.exec_()
     
     def Run(self):
         SelectionP = self.ComboBoxPolygones.currentText()
-        CoucheP=fonctionsF.getVectorLayerByName(SelectionP)
+        CoucheP=fonctionsPolygonPile.getVectorLayerByName(SelectionP)
         featP=QgsFeature()
         counterP=0
         #global DicoP_non_classe,DicoP_classe
@@ -174,7 +198,7 @@ class Ui_Dialog(object):
             self.progressBar.setValue(zPercent)
         #QMessageBox.information(None,"DEBUG DicoP_classe ", str(DicoP_classe)+' compteurPnc :'+ str(c))
         Pyramide=QgsVectorLayer("Polygon",'Pile_of_'+ str(CoucheP.name()), "memory")
-        QgsMapLayerRegistry.instance().addMapLayer(Pyramide)
+        QgsProject.instance().addMapLayer(Pyramide)
         prPyramide = Pyramide.dataProvider()
         ListeChamps=[]
         ProviderP=CoucheP.dataProvider()
@@ -223,7 +247,6 @@ class Ui_Dialog(object):
                     prPyramide.addFeatures([newfeat])
             
         Pyramide.commitChanges()
-        #iface.mapCanvas().refresh()                     
         self.iface.mapCanvas().refresh()    
  
               
