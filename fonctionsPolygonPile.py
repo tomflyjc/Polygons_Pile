@@ -6,7 +6,7 @@
   
                               -------------------
         begin                : 2016-01-12
-        copyright            : (C) 2016 by Jean-Christophe Baudin 
+        copyright            : Version QGIS 3 (C) 2019 by Jean-Christophe Baudin 
                                
         email                : jeanchristophebaudin@ymail.com
  ***************************************************************************/
@@ -21,14 +21,20 @@
  ***************************************************************************/
 """
 import unicodedata,sys
-from PyQt4 import QtCore
-from PyQt4 import QtGui
-from qgis.core import *
-from qgis.gui import *
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5.QtCore import QVariant
+from qgis.PyQt.QtWidgets import (QMessageBox)
+from qgis.core import  (QgsProject,
+                        QgsMapLayer,
+                        QgsVectorLayer
+                       )
+                       
+
 
 def getVectorLayerByName(NomCouche):
-    layermap=QgsMapLayerRegistry.instance().mapLayers()
-    for name, layer in layermap.iteritems():
+    layermap=QgsProject.instance().mapLayers()
+    for name,layer in layermap.items():
         if layer.type()==QgsMapLayer.VectorLayer and layer.name()==NomCouche:
             if layer.isValid():
                return layer
